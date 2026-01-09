@@ -1,0 +1,28 @@
+[workspace]
+name = "momoka"
+channels = ["conda-forge", "robostack-humble", "pytorch", "nvidia"]
+platforms = ["linux-64", "win-64"]
+
+[dependencies]
+python = "3.11.*"
+
+[pypi-dependencies]
+websockets = "*"
+
+[system-requirements]
+cuda = "12.8"
+
+[feature.ros2.dependencies]
+ros-humble-ros-base = "*"
+
+[feature.mujoco.dependencies]
+mujoco = "*"
+
+[feature.lerobot.pypi-dependencies]
+lerobot = { git = "https://github.com/oxyflour/lerobot.git", rev = "v0.4.2-transformers-use-zip", extras = ["pi"] }
+torch = { version = ">=2.5.1", index = "https://download.pytorch.org/whl/cu128" }
+
+[environments]
+ros2 = ["ros2"]
+lerobot = ["lerobot"]
+mujoco-ros = ["ros2", "mujoco"]

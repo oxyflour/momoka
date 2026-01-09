@@ -1,0 +1,6 @@
+.pixi/
+.tmp_*/
+
+data/
+
+*.log
