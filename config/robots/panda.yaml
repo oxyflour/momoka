@@ -1,0 +1,22 @@
+name: panda
+urdf: data/PandaRobot.jl-master/deps/Panda/panda.urdf
+mesh_base: data/PandaRobot.jl-master/deps/Panda/meshes
+package_replacements:
+  - from: "package://Panda/"
+    to: ""
+ctrl_range:
+  - [-2.8973, 2.8973]
+  - [-1.7628, 1.7628]
+  - [-2.8973, 2.8973]
+  - [-3.0718, -0.0698]
+  - [-2.8973, 2.8973]
+  - [-2.8973, 2.8973]
+  - [-2.8973, 2.8973]
+joint_names:
+  - panda_joint1
+  - panda_joint2
+  - panda_joint3
+  - panda_joint4
+  - panda_joint5
+  - panda_joint6
+  - panda_joint7

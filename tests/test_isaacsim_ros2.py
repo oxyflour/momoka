@@ -145,7 +145,7 @@ class TestRos2MujocoCompatibility(unittest.TestCase):
     def test_action_extraction_compatibility(self):
         """Test that action extraction works the same way in both implementations."""
         from scripts.isaacsim_ros2 import _extract_action as isaac_extract
-        from scripts.ros2_mujoco import _extract_action as mujoco_extract
+        from scripts.mujoco_ros2 import _extract_action as mujoco_extract
 
         from std_msgs.msg import String
         import json

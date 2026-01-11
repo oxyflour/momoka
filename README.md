@@ -70,47 +70,71 @@ simulation using the first action value.
 pixi run -e mujoco python scripts/ros2_mujoco_sim.py
 ```
 
-## Panda demo (lerobot -> ROS 2 -> MuJoCo / Isaac Sim)
+## Robot Configuration
 
-Use a public Franka Panda model from the MuJoCo menagerie.
+Robots are configured via YAML files in `config/robots/`. Each config defines:
 
-1) Ensure the Panda XML and assets are present:
-   - `data/mujoco_menagerie/franka_emika_panda/panda.xml`
-   - Download the assets listed in `data/mujoco_menagerie/franka_emika_panda/ASSETS.txt`
-     into `data/mujoco_menagerie/franka_emika_panda/assets/`
+- `name`: Robot identifier
+- `urdf`: Path to URDF or MJCF XML file
+- `mjcf_to_urdf`: Whether to convert MJCF to URDF (default: false)
+- `mesh_base`: Base path for mesh files (optional)
+- `package_replacements`: List of `from`/`to` pairs for URI replacement
+- `ctrl_range`: Override joint control ranges (optional)
+- `joint_names`: Ordered list of joint names (optional)
 
-2) Run the MuJoCo demo:
+Example `config/robots/panda.yaml`:
 
-```bash
-pixi run -e mujoco python scripts/ros2_mujoco_panda.py
+```yaml
+name: panda
+urdf: data/mujoco_menagerie/franka_emika_panda/panda.xml
+mjcf_to_urdf: true
+mesh_base: data/mujoco_menagerie/franka_emika_panda/assets
+package_replacements:
+  - from: "package://Panda/"
+    to: ""
+  - from: "package://panda/"
+    to: ""
+ctrl_range:
+  - [-2.8973, 2.8973]
+  - [-1.7628, 1.7628]
+  - [-2.8973, 2.8973]
+  - [-3.0718, -0.0698]
+  - [-2.8973, 2.8973]
+  - [-2.8973, 2.8973]
+  - [-2.8973, 2.8973]
+joint_names:
+  - panda_joint1
+  - panda_joint2
+  - panda_joint3
+  - panda_joint4
+  - panda_joint5
+  - panda_joint6
+  - panda_joint7
 ```
 
-3) Run the Isaac Sim demo (Franka asset expected in Isaac Sim assets):
+## MuJoCo bridge (lerobot -> ROS 2 -> MuJoCo)
+
+1) Ensure the robot XML and assets are present (e.g., Panda):
 
 ```bash
-set ROS_DISTRO=humble
-set RMW_IMPLEMENTATION=rmw_fastrtps_cpp
-set PATH=%PATH%;%CONDA_PREFIX%/lib/site-packages/isaacsim/exts/isaacsim.ros2.bridge/humble/lib
-isaacsim --exec scripts\isaacsim_ros2_panda.py --/isaac/startup/ros_bridge_extension=isaacsim.ros2.bridge
+# Panda example
+data/mujoco_menagerie/franka_emika_panda/panda.xml
+data/mujoco_menagerie/franka_emika_panda/assets/  # with assets from ASSETS.txt
 ```
 
-Isaac Sim uses the same MuJoCo `panda.xml` via the MJCF importer extension
-(`omni.isaac.mjcf` must be enabled).
-Action mapping: the first N action values are applied to the robot joints
-(MuJoCo uses actuator ctrlrange; Isaac Sim applies a small delta to joint positions).
+2) Run the bridge with `--robot` flag (default: panda):
 
-## Isaac Sim bridge (ROS 2 -> Isaac Sim)
+```bash
+pixi run -e mujoco python scripts/mujoco_ros2.py --robot panda
+```
 
-Run this with the `mujoco` environment (includes ROS 2 and MuJoCo).
-It subscribes to `/lerobot/inference` and drives the Panda robot from the MuJoCo menagerie.
+3) Run the lerobot WS client:
 
-The implementation:
-- Reads the same MJCF XML file as `ros2_mujoco.py`
-- Converts MJCF to URDF using `mjcf2urdf` (not Isaac Sim's MJCF importer)
-- Loads the robot into Isaac Sim via URDF importer
-- Maps actions to joint positions with proper range scaling
+```bash
+pixi run -e lerobot python scripts/lerobot_ws_client.py
+```
 
-### Setup
+## Isaac Sim bridge (lerobot -> ROS 2 -> Isaac Sim)
 
 1) Install additional dependency:
 
@@ -118,35 +142,29 @@ The implementation:
 pixi run -e mujoco pip install mjcf2urdf
 ```
 
-2) Ensure Panda XML and assets are present:
-   - `data/mujoco_menagerie/franka_emika_panda/panda.xml`
-   - Download assets listed in `data/mujoco_menagerie/franka_emika_panda/ASSETS.txt`
-     into `data/mujoco_menagerie/franka_emika_panda/assets/`
+2) Ensure robot XML and assets are present.
 
 3) Run the bridge:
 
 ```bash
-pixi run -e mujoco python scripts/isaacsim_ros2.py
+pixi run -e mujoco python scripts/isaacsim_ros2.py --robot panda
 ```
 
-### Manual Testing
-
-Run the manual test suite to verify MJCF to URDF conversion and action handling:
-
-```bash
-pixi run -e mujoco python scripts/test_isaacsim_ros2_manual.py
-```
-
-### Isaac Sim Native (Alternative)
-
-If you want to run inside Isaac Sim 5.1 Python environment with ROS 2 Bridge extension enabled:
+4) Or run inside Isaac Sim with ROS 2 Bridge extension:
 
 ```bash
 set ROS_DISTRO=humble
 set RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 set PATH=%PATH%;%CONDA_PREFIX%/lib/site-packages/isaacsim/exts/isaacsim.ros2.bridge/humble/lib
-isaacsim --exec scripts\isaacsim_ros2.py --/isaac/startup/ros_bridge_extension=isaacsim.ros2.bridge
+isaacsim --exec scripts\isaacsim_ros2.py --robot panda --/isaac/startup/ros_bridge_extension=isaacsim.ros2.bridge
 ```
+
+### Action Mapping
+
+The first N action values are applied to the robot joints, where N is the
+number of actuators (controlled joints). MuJoCo uses actuator ctrlrange;
+Isaac Sim applies a small delta to joint positions. Control ranges can be
+overridden via `ctrl_range` in the robot config.
 
 ## WebSocket bridge (lerobot -> ROS 2)
 
@@ -156,13 +174,25 @@ separate Pixi environments and communicate over WebSocket.
 1) Start the ROS 2 WebSocket server (publishes to `lerobot/inference`):
 
 ```bash
-pixi run -e ros2 python scripts/ros2_ws_server.py
+pixi run -e ros2 python scripts/ros2_bridge.py
 ```
 
 2) In another shell, send a sample lerobot payload:
 
 ```bash
 pixi run -e lerobot python scripts/lerobot_ws_client.py
+```
+
+You can also send CompressedImage/JointState payloads directly. Include `type`
+(`compressed_image` or `joint_state`) and optional `topic` to override the ROS 2
+publish target:
+
+```json
+{"type":"compressed_image","topic":"/camera/image/compressed","format":"jpeg","data":"<base64>"}
+```
+
+```json
+{"type":"joint_state","topic":"/joint_states","name":["joint1"],"position":[0.1]}
 ```
 
 3) Verify ROS 2 topic output:
