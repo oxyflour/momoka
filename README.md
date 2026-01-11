@@ -32,7 +32,7 @@ The environments are defined in `pixi.toml`. Install them with:
 ```bash
 pixi install -e ros2
 pixi install -e lerobot
-pixi install -e mujoco-ros
+pixi install -e mujoco
 ```
 
 ## Activate and verify
@@ -67,21 +67,85 @@ This script subscribes to `/lerobot/inference` and drives a tiny MuJoCo
 simulation using the first action value.
 
 ```bash
-pixi run -e mujoco-ros python scripts/ros2_mujoco_sim.py
+pixi run -e mujoco python scripts/ros2_mujoco_sim.py
 ```
 
-## Isaac Sim bridge (ROS 2 -> Isaac Sim 5.1)
+## Panda demo (lerobot -> ROS 2 -> MuJoCo / Isaac Sim)
 
-Run this inside the Isaac Sim 5.1 Python environment with the ROS 2 Bridge extension enabled.
-It subscribes to `/lerobot/inference` and moves a cube based on the first three action values.
+Use a public Franka Panda model from the MuJoCo menagerie.
 
-Example (adjust to your Isaac Sim install path):
+1) Ensure the Panda XML and assets are present:
+   - `data/mujoco_menagerie/franka_emika_panda/panda.xml`
+   - Download the assets listed in `data/mujoco_menagerie/franka_emika_panda/ASSETS.txt`
+     into `data/mujoco_menagerie/franka_emika_panda/assets/`
+
+2) Run the MuJoCo demo:
+
+```bash
+pixi run -e mujoco python scripts/ros2_mujoco_panda.py
+```
+
+3) Run the Isaac Sim demo (Franka asset expected in Isaac Sim assets):
 
 ```bash
 set ROS_DISTRO=humble
 set RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 set PATH=%PATH%;%CONDA_PREFIX%/lib/site-packages/isaacsim/exts/isaacsim.ros2.bridge/humble/lib
-isaacsim --exec-script scripts\isaacsim_ros2_drive.py --/isaac/startup/ros_bridge_extension=isaacsim.ros2.bridge
+isaacsim --exec scripts\isaacsim_ros2_panda.py --/isaac/startup/ros_bridge_extension=isaacsim.ros2.bridge
+```
+
+Isaac Sim uses the same MuJoCo `panda.xml` via the MJCF importer extension
+(`omni.isaac.mjcf` must be enabled).
+Action mapping: the first N action values are applied to the robot joints
+(MuJoCo uses actuator ctrlrange; Isaac Sim applies a small delta to joint positions).
+
+## Isaac Sim bridge (ROS 2 -> Isaac Sim)
+
+Run this with the `mujoco` environment (includes ROS 2 and MuJoCo).
+It subscribes to `/lerobot/inference` and drives the Panda robot from the MuJoCo menagerie.
+
+The implementation:
+- Reads the same MJCF XML file as `ros2_mujoco.py`
+- Converts MJCF to URDF using `mjcf2urdf` (not Isaac Sim's MJCF importer)
+- Loads the robot into Isaac Sim via URDF importer
+- Maps actions to joint positions with proper range scaling
+
+### Setup
+
+1) Install additional dependency:
+
+```bash
+pixi run -e mujoco pip install mjcf2urdf
+```
+
+2) Ensure Panda XML and assets are present:
+   - `data/mujoco_menagerie/franka_emika_panda/panda.xml`
+   - Download assets listed in `data/mujoco_menagerie/franka_emika_panda/ASSETS.txt`
+     into `data/mujoco_menagerie/franka_emika_panda/assets/`
+
+3) Run the bridge:
+
+```bash
+pixi run -e mujoco python scripts/isaacsim_ros2.py
+```
+
+### Manual Testing
+
+Run the manual test suite to verify MJCF to URDF conversion and action handling:
+
+```bash
+pixi run -e mujoco python scripts/test_isaacsim_ros2_manual.py
+```
+
+### Isaac Sim Native (Alternative)
+
+If you want to run inside Isaac Sim 5.1 Python environment with ROS 2 Bridge extension enabled:
+
+```bash
+set ROS_DISTRO=humble
+set RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+set PATH=%PATH%;%CONDA_PREFIX%/lib/site-packages/isaacsim/exts/isaacsim.ros2.bridge/humble/lib
+isaacsim --exec scripts\isaacsim_ros2.py --/isaac/startup/ros_bridge_extension=isaacsim.ros2.bridge
 ```
 
 ## WebSocket bridge (lerobot -> ROS 2)

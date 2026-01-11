@@ -1,6 +1,8 @@
 .pixi/
 .tmp_*/
 
+__pycache__/
+
 data/
 
 *.log
