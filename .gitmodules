@@ -1,0 +1,3 @@
+[submodule "deps/lerobot-mujoco-tutorial"]
+	path = deps/lerobot-mujoco-tutorial
+	url = https://github.com/jeongeun980906/lerobot-mujoco-tutorial

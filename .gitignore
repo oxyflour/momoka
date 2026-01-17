@@ -1,0 +1,8 @@
+.pixi/
+.ruff_cache/
+*.egg-info/
+__pycache__/
+
+lfs/
+build/
+data/

@@ -1,0 +1,11 @@
+robot:
+  type: mmk_mujoco_robot
+
+dataset:
+  repo_id: local/mmk_mujoco
+  push_to_hub: false
+  root: data/mmk0
+  single_task: dummy
+
+teleop:
+  type: keyboard
