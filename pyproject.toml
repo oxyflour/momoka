@@ -3,11 +3,11 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "lerobot_robot_mmk"
+name = "mmk"
 version = "0.1.0"
 description = "LeRobot custom hardware plugin for MMK."
 requires-python = ">=3.10"
 dependencies = ["lerobot"]
 
 [tool.setuptools.packages.find]
-where = ["."]
+where = ["src"]

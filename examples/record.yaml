@@ -1,5 +1,6 @@
 robot:
   type: mmk_mujoco_robot
+  scene: C:/Projects/mmk3/deps/lerobot-mujoco-tutorial/asset/example_scene_y.xml
 
 dataset:
   repo_id: local/mmk_mujoco
@@ -8,4 +9,4 @@ dataset:
   single_task: dummy
 
 teleop:
-  type: keyboard
+  type: mmk_teleop

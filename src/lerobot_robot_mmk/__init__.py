@@ -1,1 +1,7 @@
-from mmk.robot.mujoco import Mujoco, MujocoConfig
+from .config import MujocoConfig
+from .robot import Mujoco
+
+__all__ = [
+    'MujocoConfig',
+    'Mujoco',
+]

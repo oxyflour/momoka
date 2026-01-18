@@ -21,8 +21,8 @@ class CameraSetup:
 @RobotConfig.register_subclass("mmk_base_robot")
 @dataclass
 class BaseRobotConfig(RobotConfig):
-    motors: dict[str, MotorSetup] | None
-    cameras: dict[str, CameraSetup] | None
+    motors: dict[str, MotorSetup] = field(default_factory=dict)
+    cameras: dict[str, CameraSetup] = field(default_factory=dict)
     calibrated = True
     headless = False
 
