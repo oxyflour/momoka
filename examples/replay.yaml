@@ -4,10 +4,6 @@ robot:
 
 dataset:
   repo_id: local/mmk_mujoco
-  push_to_hub: false
   # change this
   root: data/mmk0
-  single_task: dummy
-
-teleop:
-  type: mmk_teleop
+  episode: 0

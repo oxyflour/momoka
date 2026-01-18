@@ -1,7 +1,9 @@
-from .config import MujocoConfig
-from .robot import Mujoco
+from .config import MujocoConfig, IsaacConfig
+from .robot import Mujoco, Isaac
 
 __all__ = [
-    'MujocoConfig',
-    'Mujoco',
+    "MujocoConfig",
+    "Mujoco",
+    "IsaacConfig",
+    "Isaac",
 ]
