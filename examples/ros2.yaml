@@ -1,12 +1,33 @@
-topics:
-- topic: /hdas/arm
-  state_offset: [0, 7]
+robot:
+  type: mmk_mujoco_robot
+  # update the scene path for your environment
+  scene: C:/Projects/mmk3/deps/lerobot-mujoco-tutorial/asset/example_scene_y.xml
+  headless: false
 
-- topic: /hdas/gripper
-  state_offset: [7, 8]
+ros2:
+  topics:
+    - kind: observation
+      topic: /mmk/left_arm
+      motor_names: [left_joint_1, left_joint_2]
+    - kind: observation
+      topic: /mmk/right_arm
+      motor_names: [right_joint_1, right_joint_2]
+    - kind: action
+      topic: /mmk/left_action
+      motor_names: [left_joint_1, left_joint_2]
+    - kind: action
+      topic: /mmk/right_action
+      motor_names: [right_joint_1, right_joint_2]
+    - kind: camera
+      topic: /mmk/left_camera
+      name: left_camera
+    - kind: camera
+      topic: /mmk/right_camera
+      name: right_camera
+  publish_rate_hz: 30.0
+  connect_on_start: true
 
-- topic: /hdas/wrist_camera/image
-  feature_name: observation.image.top
-  camera_setup:
-    width: 640
-    height: 480
+control:
+  policy_server_url: http://127.0.0.1:8000
+  chunk_size: 4
+  request_timeout_s: 1.0
