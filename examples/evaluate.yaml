@@ -1,0 +1,13 @@
+robot:
+  type: mmk_mujoco_robot
+  scene: C:/Projects/mmk3/deps/lerobot-mujoco-tutorial/asset/example_scene_y.xml
+
+dataset:
+  repo_id: local/mmk_mujoco
+  push_to_hub: false
+  # change this
+  root: data/mmk0
+  single_task: dummy
+
+policy:
+  path: data/pretrained

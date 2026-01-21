@@ -1,0 +1,12 @@
+topics:
+- topic: /hdas/arm
+  state_offset: [0, 7]
+
+- topic: /hdas/gripper
+  state_offset: [7, 8]
+
+- topic: /hdas/wrist_camera/image
+  feature_name: observation.image.top
+  camera_setup:
+    width: 640
+    height: 480
